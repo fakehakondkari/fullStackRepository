@@ -47,7 +47,26 @@ jobs:
           -o StrictHostKeyChecking=no \
           target/*.jar \
           ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/app/app.jar
-          
+
+      - name: Debug SSH
+        run: |
+         echo "Host: ${{ secrets.EC2_HOST }}"
+         echo "User: ${{ secrets.EC2_USER }}"
+         cat private_key.pem | head -3
+         nc -zv ${{ secrets.EC2_HOST }} 22 || echo "PORT 22 UNREACHABLE"
+         ssh -i private_key.pem \
+         -o StrictHostKeyChecking=no \
+         -o ConnectTimeout=10 \
+         -v \
+         ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+         "echo SSH_SUCCESS" 2>&1 || echo "EXIT CODE: $?" 
+
+      - name: Create SSH Key
+        run: |
+         echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+         chmod 600 private_key.pem
+         # Verify it looks correct
+         cat private_key.pem
 
       #  ^^^ use the secret here
       - name: Test SSH Connection
