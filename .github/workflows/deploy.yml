@@ -82,7 +82,7 @@ jobs:
           ssh -i private_key.pem \
           -o StrictHostKeyChecking=no \
           ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
-          "pkill -f 'app.jar' || true; sleep 2"
+          "pkill -f 'app.jar'; echo pkill_exit:$?; true"
 
       - name: Start Application
         run: |
